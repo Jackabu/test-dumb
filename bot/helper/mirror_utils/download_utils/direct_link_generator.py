@@ -33,7 +33,7 @@ def direct_link_generator(link: str):
     if 'youtube.com' in link or 'youtu.be' in link:
         raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.MirrorCommand} to mirror Youtube link\nUse /{BotCommands.ZipMirrorCommand} to make zip of Youtube playlist")
     elif 'zippyshare.com' in text_url:
-        return zippy_share(text_url)
+        raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.MirrorCommand} to mirror Youtube link")
     elif 'yadi.sk' in text_url:
         return yandex_disk(text_url)
     elif 'cloud.mail.ru' in text_url:
