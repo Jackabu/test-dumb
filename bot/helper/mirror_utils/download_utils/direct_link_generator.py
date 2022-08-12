@@ -31,7 +31,7 @@ fmed_list = ['fembed.net', 'fembed.com', 'femax20.com', 'fcdn.stream', 'feurl.co
 def direct_link_generator(link: str):
     """ direct links generator """
     if 'youtube.com' in link or 'youtu.be' in link:
-        raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.WatchCommand} to mirror Youtube link\nUse /{BotCommands.ZipWatchCommand} to make zip of Youtube playlist")
+        raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.MirrorCommand} to mirror Youtube link\nUse /{BotCommands.ZipMirrorCommand} to make zip of Youtube playlist")
     elif 'zippyshare.com' in text_url:
         return zippy_share(text_url)
     elif 'yadi.sk' in text_url:
@@ -149,19 +149,28 @@ def direct_link_generator(link: str):
 
 
 def zippy_share(url: str) -> str:
-    url = 'https://www11.zippyshare.com/v/f8aKoJMB/file.html'
+    link = re.findall("https:/.(.*?).zippyshare", url)[0]
+    response_content = (requests.get(url)).content
+    bs_obj = BeautifulSoup(response_content, "lxml")
 
-    base_url = re.search('http.+.zippyshare.com/', url).group()
-    response = r.get(url).content
-    pages = b4(response, "lxml")
-    js_script = pages.find("div", {"class": "right"})
-    js_script = js_script.find_all("script")[0]
-    js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))[0]
-    js_content = str(js_content).split('"')
-    a = str(js_script).split('var a = ')[1].split(';')[0]
-    value = int(a) ** 3 + 3
+    try:
+        js_script = bs_obj.find("div", {"class": "center",}).find_all(
+            "script"
+        )[1]
+    except:
+        js_script = bs_obj.find("div", {"class": "right",}).find_all(
+            "script"
+        )[0]
 
-    print(base_url + js_content[0] + str(value) + js_content[2])
+    js_content = re.findall(r'\.href.=."/(.*?)";', str(js_script))
+    js_content = 'var x = "/' + js_content[0] + '"'
+
+    evaljs = EvalJs()
+    setattr(evaljs, "x", None)
+    evaljs.execute(js_content)
+    js_content = getattr(evaljs, "x")
+
+    return f"https://{link}.zippyshare.com{js_content}"
 
 
 def yandex_disk(url: str) -> str:
@@ -595,6 +604,86 @@ def gplink(url):
     res = scraper.post(final_url, data=data, headers=h).json()
 
     return res
+
+def appdrive_dl(url: str, is_direct) -> str:
+    """ AppDrive link generator
+    By https://github.com/xcscxr , More Clean Look by https://github.com/DragonPower84 """
+
+    if EMAIL is None or PWSSD is None:
+        raise DirectDownloadLinkException("Appdrive Cred Is Not Given")
+    account = {'email': EMAIL, 'passwd': PWSSD}
+    client = requests.Session()
+    client.headers.update({
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"
+    })
+    data = {
+        'email': account['email'],
+        'password': account['passwd']
+    }
+    client.post(f'https://{urlparse(url).netloc}/login', data=data)
+    data = {
+        'root_drive': '',
+        'folder': GDRIVE_FOLDER_ID
+    }
+    client.post(f'https://{urlparse(url).netloc}/account', data=data)
+    res = client.get(url)
+    key = re.findall(r'"key",\s+"(.*?)"', res.text)[0]
+    ddl_btn = etree.HTML(res.content).xpath("//button[@id='drc']")
+    info = re.findall(r'>(.*?)<\/li>', res.text)
+    info_parsed = {}
+    for item in info:
+        kv = [s.strip() for s in item.split(':', maxsplit = 1)]
+        info_parsed[kv[0].lower()] = kv[1] 
+    info_parsed = info_parsed
+    info_parsed['error'] = False
+    info_parsed['link_type'] = 'login' # direct/login
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={'-'*4}_",
+    }
+    data = {
+        'type': 1,
+        'key': key,
+        'action': 'original'
+    }
+    if len(ddl_btn):
+        info_parsed['link_type'] = 'direct'
+        data['action'] = 'direct'
+    while data['type'] <= 3:
+        boundary=f'{"-"*6}_'
+        data_string = ''
+        for item in data:
+             data_string += f'{boundary}\r\n'
+             data_string += f'Content-Disposition: form-data; name="{item}"\r\n\r\n{data[item]}\r\n'
+        data_string += f'{boundary}--\r\n'
+        gen_payload = data_string
+        try:
+            response = client.post(url, data=gen_payload, headers=headers).json()
+            break
+        except: data['type'] += 1
+    if 'url' in response:
+        info_parsed['gdrive_link'] = response['url']
+    elif 'error' in response and response['error']:
+        info_parsed['error'] = True
+        info_parsed['error_message'] = response['message']
+    else:
+        info_parsed['error'] = True
+        info_parsed['error_message'] = 'Something went wrong :('
+    if info_parsed['error']: return info_parsed
+    if urlparse(url).netloc == 'driveapp.in' and not info_parsed['error']:
+        res = client.get(info_parsed['gdrive_link'])
+        drive_link = etree.HTML(res.content).xpath("//a[contains(@class,'btn')]/@href")[0]
+        info_parsed['gdrive_link'] = drive_link
+    if urlparse(url).netloc == 'drivesharer.in' and not info_parsed['error']:
+        res = client.get(info_parsed['gdrive_link'])
+        drive_link = etree.HTML(res.content).xpath("//a[contains(@class,'btn btn-primary')]/@href")[0]
+        info_parsed['gdrive_link'] = drive_link
+    if urlparse(url).netloc == 'drivebit.in' and not info_parsed['error']:
+        res = client.get(info_parsed['gdrive_link'])
+        drive_link = etree.HTML(res.content).xpath("//a[contains(@class,'btn btn-primary')]/@href")[0]
+        info_parsed['gdrive_link'] = drive_link
+    info_parsed['src_url'] = url
+    return info_parsed
+
 
 def linkvertise(url: str):
     client = requests.Session()
