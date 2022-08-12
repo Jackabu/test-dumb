@@ -49,7 +49,6 @@ class _BotCommands:
         self.QbUnzipLeechCommand = getCommand('QBZIPLEECH_COMMAND', f'qbunzipleech{CMD_INDEX}')
         self.QbZipLeechCommand = getCommand('QBUNZIPLEECH_COMMAND', f'qbzipleech{CMD_INDEX}')
         self.LeechWatchCommand =getCommand('LEECHWATCH_COMMAND',  f'leechwatch{CMD_INDEX}')
-        self.MultiCommand =getCommand('MULTI_COMMAND',  f'multi{CMD_INDEX}')
         self.LeechZipWatchCommand = getCommand('LEECHZIPWATCH_COMMAND', f'leechzipwatch{CMD_INDEX}')
         self.RssListCommand = getCommand('RSSLIST_COMMAND', f'rsslist{CMD_INDEX}')
         self.RssGetCommand = getCommand('RSSGET_COMMAND', f'rssget{CMD_INDEX}')
