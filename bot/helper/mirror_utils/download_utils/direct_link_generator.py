@@ -27,13 +27,14 @@ from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
 fmed_list = ['fembed.net', 'fembed.com', 'femax20.com', 'fcdn.stream', 'feurl.com', 'layarkacaxxi.icu',
              'naniplay.nanime.in', 'naniplay.nanime.biz', 'naniplay.com', 'mm9842.com']
 
+drive_list = ['driveapp.in', 'gdflix.pro', 'drivelinks.in', 'drivesharer.in', 'driveflix.in', 'drivebit.in', 'drivehub.in', 'driveace.in']
 
-def direct_link_generator(link: str):
-    """ direct links generator """
-    if 'youtube.com' in link or 'youtu.be' in link:
-        raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.MirrorCommand} to mirror Youtube link\nUse /{BotCommands.ZipMirrorCommand} to make zip of Youtube playlist")
+def url_link_generate(text_url: str):
+    ### Direct Links Generator ++++
+    if not text_url:
+        raise DirectDownloadLinkException("`No Links Found!, Try Again` !!")
     elif 'zippyshare.com' in text_url:
-        raise DirectDownloadLinkException(f"ERROR: Use /{BotCommands.MirrorCommand} to mirror zippyshare link")
+        return zippy_share(text_url)
     elif 'yadi.sk' in text_url:
         return yandex_disk(text_url)
     elif 'cloud.mail.ru' in text_url:
