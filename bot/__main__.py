@@ -131,7 +131,7 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.ZipWatchCommand}</b> [yt-dlp supported link]: Mirror yt-dlp supported link as zip
 <br><br>
-<b>/{BotCommands.LeechWatchCommand}</b> [yt-dlp supported link]: Leech yt-dlp supported link
+<b>/{BotCommands.MultiCommand}</b> [Multiple Sites]: Zippyshare Instagram Youtube Gofiles supported links 
 <br><br>
 <b>/{BotCommands.LeechZipWatchCommand}</b> [yt-dlp supported link]: Leech yt-dlp supported link as zip
 <br><br>
