@@ -166,7 +166,7 @@ Bro, Need Any Help!!
 '''
 help = telegraph.create_page(
         title='Dumbleech database',
-        content=help_string_telegraph + sudo_help_string,
+        content=help_string_telegraph,
     )["path"]
 
 def bot_help(update, context):
