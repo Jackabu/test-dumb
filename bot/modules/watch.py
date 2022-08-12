@@ -161,12 +161,11 @@ def _watch(bot, message, isZip=False, isLeech=False, multi=0):
                 else:
                     buttons.sbutton(str(_format), f"qu {msg_id} dict {_format}")
         buttons.sbutton("Audios", f"qu {msg_id} audio")
-        buttons.sbutton("Smart Video", f"qu {msg_id} {best_video}")
-        buttons.sbutton("Smart Audio", f"qu {msg_id} {best_audio}")
+        buttons.sbutton("File", f"qu {msg_id} {best_video}")
         buttons.sbutton("Cancel", f"qu {msg_id} cancel")
         YTBUTTONS = InlineKeyboardMarkup(buttons.build_menu(2))
         listener_dict[msg_id] = [listener, user_id, link, name, YTBUTTONS, args, formats_dict]
-        bmsg = sendMarkup('Bro Choose Video Quality ', bot, message, YTBUTTONS)
+        bmsg = sendMarkup('Bro Choose File To Download ', bot, message, YTBUTTONS)
 
     Thread(target=_auto_cancel, args=(bmsg, msg_id)).start()
     Thread(target=auto_delete_upload_message, args=(bot, message, bmsg)).start()
