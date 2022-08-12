@@ -133,8 +133,6 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.LeechWatchCommand}</b> [yt-dlp supported link]: Leech yt-dlp supported link
 <br><br>
-<b>/{BotCommands.MultiCommand}</b> [for download Instagram / Zippyshare]: Multiple Sites
-<br><br>
 <b>/{BotCommands.LeechZipWatchCommand}</b> [yt-dlp supported link]: Leech yt-dlp supported link as zip
 <br><br>
 <b>/{BotCommands.LeechSetCommand}</b>: Leech settings
